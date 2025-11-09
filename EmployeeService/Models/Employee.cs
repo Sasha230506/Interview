@@ -1,15 +1,17 @@
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace EmployeeService.Models
 {
+    [DataContract]
     public class Employee
     {
-        public int ID { get; set; }
+        [DataMember] public int ID { get; set; }
 
-        public string Name { get; set; }
+        [DataMember] public string Name { get; set; }
 
-        public bool Enable { get; set; }
+        [DataMember] public bool Enable { get; set; }
 
-        public List<Employee> Subordinates { get; set; } = new List<Employee>();
+        [DataMember] public List<Employee> Subordinates { get; set; } = new List<Employee>();
     }
 }

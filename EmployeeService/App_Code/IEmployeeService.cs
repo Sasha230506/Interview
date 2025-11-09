@@ -15,6 +15,5 @@ namespace EmployeeService.App_Code
         [OperationContract]
         [WebInvoke(Method = "PUT", UriTemplate = "EnableEmployee?id={id}&enable={enable}", ResponseFormat = WebMessageFormat.Json)]
         Task EnableEmployeeAsync(int id, bool enable);
-
     }
 }

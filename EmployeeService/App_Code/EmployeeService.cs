@@ -1,5 +1,6 @@
 using System;
-using System.Collections.Generic;
+using System.Net;
+using System.ServiceModel.Web;
 using System.Threading.Tasks;
 using EmployeeService.Models;
 using EmployeeService.Repositories;
@@ -23,21 +24,28 @@ namespace EmployeeService.App_Code
 
                 if (employee == null)
                 {
-                    return new Employee
-                    {
-                        ID = id,
-                        Name = "Not Found",
-                        Enable = false,
-                        Subordinates = new List<Employee>()
-                    };
+                    WebOperationContext.Current.OutgoingResponse.StatusCode = HttpStatusCode.NotFound;
+                    WebOperationContext.Current.OutgoingResponse.StatusDescription = $"Employee with ID={id} not found.";
+
+                    return null;
                 }
 
+                WebOperationContext.Current.OutgoingResponse.StatusCode = HttpStatusCode.OK;
+                WebOperationContext.Current.OutgoingResponse.StatusDescription = $"Employee with ID={id} retrieved successfully.";
                 return employee;
+            }
+            catch (ArgumentException ex)
+            {
+                WebOperationContext.Current.OutgoingResponse.StatusCode = HttpStatusCode.BadRequest;
+                WebOperationContext.Current.OutgoingResponse.StatusDescription = ex.Message;
+                return null;
             }
             catch (Exception ex)
             {
+                WebOperationContext.Current.OutgoingResponse.StatusCode = HttpStatusCode.InternalServerError;
+                WebOperationContext.Current.OutgoingResponse.StatusDescription = ex.Message;
                 Console.WriteLine($"Error in GetEmployeeByIdAsync: {ex}");
-                throw;
+                return null;
             }
         }
 
@@ -45,13 +53,23 @@ namespace EmployeeService.App_Code
         {
             try
             {
-                await _repository.EnableEmployeeAsync(id, enable);
-                Console.WriteLine($"Employee {id} enable set to {enable}");
+                var affected = await _repository.EnableEmployeeAsync(id, enable);
+
+                if (affected == 0)
+                {
+                    WebOperationContext.Current.OutgoingResponse.StatusCode = HttpStatusCode.NotFound;
+                    WebOperationContext.Current.OutgoingResponse.StatusDescription = $"Employee with ID={id} not found.";
+                    return;
+                }
+
+                WebOperationContext.Current.OutgoingResponse.StatusCode = HttpStatusCode.OK;
+                WebOperationContext.Current.OutgoingResponse.StatusDescription = $"Employee {id} updated successfully (Enable={enable}).";
             }
             catch (Exception ex)
             {
+                WebOperationContext.Current.OutgoingResponse.StatusCode = HttpStatusCode.InternalServerError;
+                WebOperationContext.Current.OutgoingResponse.StatusDescription = ex.Message;
                 Console.WriteLine($"Error in EnableEmployeeAsync: {ex}");
-                throw;
             }
         }
     }

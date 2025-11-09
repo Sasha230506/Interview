@@ -111,11 +111,14 @@ namespace EmployeeService.Repositories
             return rootEmployee;
         }
 
-        public async Task EnableEmployeeAsync(int id, bool enable)
+        public async Task<int> EnableEmployeeAsync(int id, bool enable)
         {
             Console.WriteLine($"[INFO] EnableEmployeeAsync called with ID={id}, enable={enable}");
 
-            if (id <= 0) throw new ArgumentException("Employee ID must be positive.", nameof(id));
+            if (id <= 0)
+                throw new ArgumentException("Employee ID must be positive.", nameof(id));
+
+            int affectedRows = 0;
 
             await RetryHelper.ExecuteWithRetryAsync(async () =>
             {
@@ -129,8 +132,8 @@ namespace EmployeeService.Repositories
                             command.Parameters.Add("@Enable", SqlDbType.Bit).Value = enable;
                             command.Parameters.Add("@ID", SqlDbType.Int).Value = id;
 
-                            int affected = await command.ExecuteNonQueryAsync();
-                            Console.WriteLine($"[INFO] Updated Enable for Employee ID={id}, rows affected={affected}");
+                            affectedRows = await command.ExecuteNonQueryAsync();
+                            Console.WriteLine($"[INFO] Updated Enable for Employee ID={id}, rows affected={affectedRows}");
                         }
                     }
                 }
@@ -140,6 +143,8 @@ namespace EmployeeService.Repositories
                     throw;
                 }
             });
+
+            return affectedRows;
         }
     }
 }

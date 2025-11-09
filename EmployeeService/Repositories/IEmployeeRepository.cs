@@ -6,6 +6,6 @@ namespace EmployeeService.Repositories
     public interface IEmployeeRepository
     {
         Task<Employee> GetEmployeeTreeByIdAsync(int id);
-        Task EnableEmployeeAsync(int id, bool enable);
+        Task<int> EnableEmployeeAsync(int id, bool enable);
     }
 }
